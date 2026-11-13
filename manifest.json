@@ -1,0 +1,18 @@
+{
+  "name": "JARVIS AI",
+  "short_name": "JARVIS",
+  "start_url": "/My-Jarvis/",
+  "scope": "/My-Jarvis/",
+  "display": "standalone",
+  "background_color": "#060d14",
+  "theme_color": "#060d14",
+  "orientation": "portrait",
+  "icons": [
+    {
+      "src": "icon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    }
+  ]
+}

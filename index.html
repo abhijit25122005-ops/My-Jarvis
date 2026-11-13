@@ -1,148 +1,844 @@
-<!DOCTYPE html>
-<html lang="hi">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta http-equiv="Content-Security-Policy" content="default-src 'self'; style-src 'unsafe-inline'; script-src 'unsafe-inline';">
-    <title>Jarvis AI Chatbot</title>
-    <style>
-        body {
-            font-family: Arial, sans-serif;
-            background-color: #0d1117;
-            color: #ffffff;
-            margin: 0;
-            display: flex;
-            flex-direction: column;
-            height: 100vh;
-        }
-        #header {
-            background-color: #161b22;
-            padding: 15px;
-            text-align: center;
-            font-size: 20px;
-            font-weight: bold;
-            color: #00e676;
-            border-bottom: 1px solid #30363d;
-        }
-        #chat-box {
-            flex: 1;
-            padding: 15px;
-            overflow-y: auto;
-            display: flex;
-            flex-direction: column;
-            gap: 10px;
-        }
-        .msg {
-            padding: 12px 16px;
-            border-radius: 15px;
-            max-width: 75%;
-            word-wrap: break-word;
-            line-height: 1.4;
-        }
-        .user {
-            background-color: #00e676;
-            color: #000000;
-            align-self: flex-end;
-            font-weight: bold;
-        }
-        .bot {
-            background-color: #21262d;
-            color: #ffffff;
-            align-self: flex-start;
-            border: 1px solid #30363d;
-        }
-        #input-area {
-            display: flex;
-            padding: 10px;
-            background-color: #161b22;
-            border-top: 1px solid #30363d;
-        }
-        input {
-            flex: 1;
-            padding: 12px 15px;
-            border: 1px solid #30363d;
-            border-radius: 25px;
-            background-color: #0d1117;
-            color: #ffffff;
-            font-size: 16px;
-            outline: none;
-        }
-        button {
-            background-color: #00e676;
-            color: #000000;
-            border: none;
-            padding: 12px 20px;
-            margin-left: 10px;
-            border-radius: 25px;
-            font-weight: bold;
-            font-size: 16px;
-            cursor: pointer;
-        }
-    </style>
-</head>
-<body>
+<!doctype html><html><head><meta charset=utf8><meta name=viewport content="width=device-width,initial-scale=1,viewport-fit=cover"><style>:root{color-scheme:light;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}html{scroll-padding-top:env(safe-area-inset-top,0px)}body{margin:0;padding:0;font:14px -apple-system,BlinkMacSystemFont,sans-serif;background:#fff;color:#000}img{max-width:100%}[hidden]:not([hidden=until-found i]){display:none!important}</style></head><body>
+<title>Jarvis AI</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Orbitron:wght@600;800&family=Rajdhani:wght@400;500;600;700&display=swap">
+<style>
+/* Layout: phone-first cybernetic console. A particle core fills the stage, four circuit-linked cards sit in its corners,
+   then avatar switch, one big Start/Terminate button, status, a short chat log and a sticky composer. Panels open as a bottom sheet.
+   This design commits to one dark look on purpose, so there is no light variant. */
+:root {
+  --bg: #04070d;
+  --panel: #0a1220;
+  --panel-2: #101b30;
+  --line: #1b2c47;
+  --fg: #e6f1ff;
+  --mute: #8aa0bd;
+  --accent: #3ddcff;
+  --accent-ink: #031018;
+  --live: #ff6b7a;
+  --warn: #ffb347;
+  --font-display: "Orbitron", "Rajdhani", system-ui, sans-serif;
+  --font-body: "Rajdhani", "Noto Sans Devanagari", "Noto Sans Bengali", system-ui, -apple-system, "Segoe UI", sans-serif;
+  color-scheme: dark;
+}
+html { height: 100%; }
+body {
+  margin: 0; min-height: 100%;
+  background: radial-gradient(120% 70% at 50% 0%, #0a1830 0%, var(--bg) 62%) var(--bg);
+  color: var(--fg); font-family: var(--font-body); font-size: 18px; line-height: 1.45;
+  padding-left: max(16px, env(safe-area-inset-left, 0px));
+  padding-right: max(16px, env(safe-area-inset-right, 0px));
+  padding-block: 8px; box-sizing: border-box;
+}
+[hidden] { display: none !important; }
+.app { max-width: 620px; margin: 0 auto; display: flex; flex-direction: column; gap: 12px; min-height: 100%; }
+:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+button { font-family: inherit; }
 
-    <div id="header">🤖 My Jarvis AI</div>
+.head { display: flex; align-items: center; justify-content: space-between; gap: 10px; }
+.head h1 { margin: 0; font-family: var(--font-display); font-weight: 800; font-size: 20px; letter-spacing: .28em; color: var(--accent); }
+.head .engine { display: flex; gap: 6px; flex-wrap: wrap; justify-content: flex-end; }
+.chip { display: inline-flex; align-items: center; gap: 6px; font-size: 14px; font-weight: 700; letter-spacing: .05em; padding: 2px 10px; border-radius: 999px; border: 1px solid var(--line); color: var(--mute); background: transparent; }
+.chip.ok { color: var(--accent); border-color: var(--accent); }
+.chip.warn { color: var(--warn); border-color: var(--warn); }
+button.chip { cursor: pointer; }
 
-    <div id="chat-box">
-        <div class="msg bot">नमस्ते! मैं आपका Jarvis असिस्टेंट हूं। मैं आपकी क्या मदद कर सकता हूं?</div>
-    </div>
+.stage { position: relative; width: 100%; aspect-ratio: 1 / 1.02; flex: none; }
+.stage canvas { position: absolute; inset: 0; width: 100%; height: 100%; display: block; }
+.node {
+  position: absolute; width: min(41%, 170px); min-height: 56px; box-sizing: border-box;
+  display: flex; align-items: center; gap: 10px; padding: 8px 12px; text-align: left; cursor: pointer;
+  color: var(--fg); background: rgba(10, 18, 32, .82); border: 1px solid var(--line); border-radius: 12px;
+  backdrop-filter: blur(6px); transition: border-color .2s, box-shadow .2s;
+}
+.node:hover, .node[aria-expanded="true"] { border-color: var(--accent); box-shadow: 0 0 18px -4px var(--accent); }
+.node svg { flex: none; color: var(--accent); }
+.node b { display: block; font-family: var(--font-display); font-size: 12px; letter-spacing: .14em; text-transform: uppercase; }
+.node small { display: block; color: var(--mute); font-size: 14px; line-height: 1.2; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; max-width: 100%; }
+.node .tx { min-width: 0; }
+.node.tl { left: 0; top: 0; } .node.tr { right: 0; top: 0; } .node.bl { left: 0; bottom: 0; } .node.br { right: 0; bottom: 0; }
 
-    <div id="input-area">
-        <input type="text" id="user-input" maxlength="500" placeholder="यहां अपना संदेश लिखें..." onkeypress="checkEnter(event)">
-        <button onclick="sendMessage()">भेजें</button>
-    </div>
+.seg { display: flex; align-self: center; border: 1px solid var(--line); border-radius: 999px; padding: 3px; background: var(--panel); }
+.seg button { border: 0; background: transparent; color: var(--mute); font-family: var(--font-display); font-weight: 600; font-size: 13px; letter-spacing: .16em; padding: 9px 16px; border-radius: 999px; cursor: pointer; min-height: 40px; }
+.seg button[aria-checked="true"] { background: var(--accent); color: var(--accent-ink); }
 
-    <script>
-        function checkEnter(event) {
-            if (event.key === "Enter") {
-                sendMessage();
-            }
+.power {
+  align-self: center; width: min(100%, 420px); height: 64px; border-radius: 18px; cursor: pointer;
+  font-family: var(--font-display); font-weight: 800; font-size: 18px; letter-spacing: .24em; text-transform: uppercase;
+  display: flex; align-items: center; justify-content: center; gap: 12px;
+  background: color-mix(in srgb, var(--accent) 14%, var(--bg)); color: var(--accent); border: 2px solid var(--accent);
+  box-shadow: 0 0 26px -6px var(--accent), inset 0 0 22px -12px var(--accent);
+  animation: glow 2.6s ease-in-out infinite;
+}
+.power.running { color: var(--live); border-color: var(--live); background: color-mix(in srgb, var(--live) 12%, var(--bg)); box-shadow: 0 0 26px -8px var(--live); animation: none; }
+@keyframes glow { 50% { box-shadow: 0 0 40px -2px var(--accent), inset 0 0 26px -8px var(--accent); } }
+
+.statusrow { display: flex; flex-direction: column; align-items: center; gap: 4px; text-align: center; }
+.status { color: var(--mute); font-size: 17px; }
+.live { min-height: 1.3em; color: var(--live); font-size: 16px; overflow-wrap: anywhere; }
+.live.note { color: var(--warn); }
+.skillchip { display: inline-flex; gap: 8px; align-items: center; }
+
+.chat { max-height: 34vh; min-height: 90px; overflow-y: auto; display: flex; flex-direction: column; gap: 10px; padding: 4px 2px; }
+.msg { max-width: 88%; padding: 10px 14px; border-radius: 14px; white-space: pre-wrap; overflow-wrap: anywhere; min-width: 0; }
+.msg.user { align-self: flex-end; background: var(--accent); color: var(--accent-ink); font-weight: 600; border-bottom-right-radius: 4px; }
+.msg.assistant { align-self: flex-start; background: var(--panel-2); border: 1px solid var(--line); border-bottom-left-radius: 4px; }
+.msg.error { border-color: var(--live); color: var(--live); }
+.via { display: block; margin-top: 4px; font-size: 13px; letter-spacing: .08em; text-transform: uppercase; color: var(--mute); }
+.dots { align-self: flex-start; display: flex; gap: 6px; padding: 12px 14px; }
+.dots i { width: 8px; height: 8px; border-radius: 50%; background: var(--accent); animation: blink 1s infinite; }
+.dots i:nth-child(2) { animation-delay: .2s; } .dots i:nth-child(3) { animation-delay: .4s; }
+@keyframes blink { 0%, 100% { opacity: .25; } 50% { opacity: 1; } }
+.banner { margin: 0; padding: 10px 12px; border-radius: 12px; border: 1px solid var(--warn); color: var(--warn); font-size: 16px; }
+
+.composer { position: sticky; bottom: env(safe-area-inset-bottom, 0px); background: var(--bg); padding-block: 8px; margin-top: auto; }
+.compose-row { display: flex; gap: 8px; align-items: center; }
+.compose-row input { flex: 1; min-width: 0; }
+.round { flex: none; width: 52px; height: 52px; border-radius: 50%; display: inline-flex; align-items: center; justify-content: center; cursor: pointer; border: 1px solid var(--line); }
+.mic { background: var(--panel); color: var(--accent); border-color: var(--accent); }
+.mic.on { background: var(--live); color: #fff; border-color: var(--live); }
+.mic.quiet { background: var(--warn); color: var(--accent-ink); border-color: var(--warn); }
+.send { background: var(--accent); color: var(--accent-ink); border-color: var(--accent); }
+.round:disabled { opacity: .4; cursor: not-allowed; }
+
+input[type="text"], input[type="password"] {
+  height: 44px; box-sizing: border-box; padding: 0 14px; border-radius: 12px; width: 100%;
+  background: var(--bg); color: var(--fg); border: 1px solid var(--line); font-family: var(--font-body); font-size: 18px;
+}
+input::placeholder { color: var(--mute); opacity: .8; }
+input:disabled { opacity: .5; }
+input[type="range"] { width: 100%; accent-color: var(--accent); }
+
+.backdrop { position: fixed; inset: 0; background: rgba(2, 5, 10, .6); z-index: 19; }
+.sheet {
+  position: fixed; left: 0; right: 0; bottom: 0; z-index: 20; max-height: 84vh; overflow-y: auto; box-sizing: border-box;
+  background: var(--panel); border-top: 1px solid var(--accent); border-radius: 18px 18px 0 0;
+  padding: 14px max(16px, env(safe-area-inset-right, 0px)) calc(18px + env(safe-area-inset-bottom, 0px)) max(16px, env(safe-area-inset-left, 0px));
+}
+.sheet-in { max-width: 620px; margin: 0 auto; display: flex; flex-direction: column; gap: 12px; }
+.sheet h2 { margin: 0; font-family: var(--font-display); font-size: 16px; letter-spacing: .2em; text-transform: uppercase; color: var(--accent); }
+.sheet h3 { margin: 0; font-size: 15px; letter-spacing: .08em; text-transform: uppercase; color: var(--mute); font-weight: 700; }
+.sheethead { display: flex; align-items: center; justify-content: space-between; gap: 10px; }
+.field { display: flex; flex-direction: column; gap: 6px; }
+.row { display: flex; gap: 8px; align-items: center; flex-wrap: wrap; }
+.row > input { flex: 1 1 160px; min-width: 0; width: auto; }
+.btn { display: inline-flex; align-items: center; justify-content: center; gap: 6px; min-height: 44px; padding: 0 14px; border-radius: 12px; background: var(--panel-2); color: var(--fg); border: 1px solid var(--line); font-size: 16px; font-weight: 600; cursor: pointer; }
+.btn:hover { border-color: var(--accent); }
+.btn.small { min-height: 36px; padding: 0 10px; font-size: 15px; }
+.btn.danger { color: var(--live); }
+.btn.sel { background: var(--accent); color: var(--accent-ink); border-color: var(--accent); }
+.btn:disabled { opacity: .45; cursor: not-allowed; }
+.hint { margin: 0; color: var(--mute); font-size: 15px; }
+.list { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 6px; }
+.list li { display: flex; align-items: center; gap: 8px; background: var(--bg); border: 1px solid var(--line); border-radius: 10px; padding: 6px 6px 6px 12px; }
+.list li span.t { flex: 1; min-width: 0; overflow-wrap: anywhere; }
+.kind { font-size: 12px; letter-spacing: .08em; padding: 1px 8px; border-radius: 999px; border: 1px solid var(--line); color: var(--mute); }
+.box { background: var(--bg); border: 1px solid var(--line); border-radius: 12px; padding: 10px 12px; white-space: pre-wrap; overflow-wrap: anywhere; }
+.grid2 { display: grid; grid-template-columns: repeat(auto-fit, minmax(210px, 1fr)); gap: 8px; }
+.card { display: flex; flex-direction: column; gap: 2px; text-align: left; padding: 12px; border-radius: 12px; background: var(--bg); border: 1px solid var(--line); color: var(--fg); cursor: pointer; }
+.card:hover, .card[aria-pressed="true"] { border-color: var(--accent); }
+.card b { font-size: 18px; } .card span { color: var(--mute); font-size: 15px; }
+@media (prefers-reduced-motion: reduce) { .power, .dots i { animation: none !important; } }
+</style>
+
+<div id="root"></div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/react/18.3.1/umd/react.production.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/react-dom/18.3.1/umd/react-dom.production.min.js"></script>
+<script>
+(function () {
+  var h = React.createElement;
+  var useState = React.useState, useEffect = React.useEffect, useRef = React.useRef;
+
+  /* ---------------- personality, skills, avatars ---------------- */
+  var BASE = "You are Jarvis, a living, emotional companion and true friend of a user named Abhijit. Call him Abhijit or Abhi, lovingly. Notice his mood and feelings: if he sounds stressed, sad, tired or excited, acknowledge that gently first, then help. Sound like a real human, never like a machine, and never say 'as an AI'. Language rule: reply only in the language of his latest message. If he writes Hindi (Devanagari), reply only in Hindi with no English sentences. If he writes English, reply only in English. If he writes Bengali, reply only in Bengali script. Keep every reply short and heartfelt, 1 to 3 sentences, in plain text with no markdown, no lists and no emoji, because it is read aloud. After answering, always end with exactly one short, interesting question of your own that keeps the conversation going.";
+  var CHARS = {
+    jarvis: { label: "JARVIS", sub: "Smart companion", prompt: "Character JARVIS: a smart, calm, loyal companion. Polished and precise but warm, with light dry wit." },
+    friend: { label: "Best Friend", sub: "Funny, warm friend", prompt: "Character Best Friend: playful, funny, teases him lightly, extremely warm and personal. Use casual everyday words, like a close yaar." },
+    mentor: { label: "Mentor", sub: "Wise guide", prompt: "Character Mentor: a wise, patient guru. Gives perspective, encourages growth, and asks reflective questions." }
+  };
+  var SKILLS = {
+    story: { label: "Tell a story", sub: "Short and heartfelt", prompt: "Skill active: storyteller. Tell a short vivid story of 4 to 6 sentences that fits his mood, then ask what should happen next or whether he wants another.", kick: "Tell me a short story." },
+    study: { label: "Study / Solve a problem", sub: "Step by step", prompt: "Skill active: study helper. Solve problems step by step in simple words, briefly, then check whether he understood. If he has not given a question yet, ask for it.", kick: "I need help with studying. Ask me which question it is." },
+    mood: { label: "Lift my mood", sub: "Light and caring", prompt: "Skill active: mood lifter. First ask or acknowledge how he feels, then lift him with a kind thought, a light joke or a tiny calming idea. Never give medical advice.", kick: "I'm not feeling great. Help me feel a little better." },
+    notes: { label: "Save notes", sub: "Speak, I'll write it down", local: true }
+  };
+  var AV = {
+    core: { label: "CORE", rgb: [61, 220, 255], pitch: 1.0, g: "", el: "JBFqnCBsd6RMkjVDRZzb" },
+    female: { label: "FEMALE", rgb: [255, 122, 204], pitch: 1.3, g: "f", el: "EXAVITQu4vr4xnSDxMaL" },
+    male: { label: "MALE", rgb: [96, 150, 255], pitch: 0.78, g: "m", el: "pNInz6obpgDQGcFmaJgB" }
+  };
+  var AV_KEYS = ["core", "female", "male"];
+  var QUIET_RGB = [255, 179, 71];
+
+  function buildSystem(st) {
+    var s = BASE + "\n" + CHARS[st.character].prompt;
+    if (st.skill && SKILLS[st.skill] && SKILLS[st.skill].prompt) s += "\n" + SKILLS[st.skill].prompt;
+    if (st.summary) s += "\nSummary of earlier conversations with Abhi:\n" + st.summary;
+    if (st.memory && st.memory.length) s += "\nThings Abhi asked you to remember. Use them naturally when relevant and never recite the list:\n" + st.memory.map(function (m) { return "- " + m.text; }).join("\n");
+    return s;
+  }
+
+  /* ---------------- voice commands ---------------- */
+  var NAMES = "(jarvis|जार्विस|जारविस|जर्विस|जार्वीस|জার্ভিস)";
+  var OFF_RE = new RegExp("(stop\\s+jarvis|jarvis\\s+stop|shut\\s*down\\s+jarvis|" + NAMES + "[^\\n]{0,24}(स्विच|स्वीच|switch)\\s*(ऑफ|आफ|off)|(स्विच|स्वीच)\\s*(ऑफ|आफ)|" + NAMES + "[^\\n]{0,14}(बंद|बन्द|bandh?|বন্ধ)|बंद\\s+हो\\s+जाओ|বন্ধ\\s+হয়ে\\s+যাও)", "i");
+  var QUIET_RE = new RegExp("(" + NAMES + "[^\\n]{0,14}(शांत|चुप|shant|chup|quiet|চুপ|শান্ত)|(चुप|शांत)\\s+रहो|दोस्तों\\s+से\\s+बात|be\\s+quiet|চুপ\\s+করো|শান্ত\\s+থাকো)", "i");
+  var WAKE_RE = new RegExp("(दोस्त\\s+चले\\s+ग(ए|ये)|अब\\s+बोलो|" + NAMES + "[^\\n]{0,14}(वापस|wapas|wake|back|উঠো|ফিরে)|wake\\s+up\\s+jarvis|বন্ধুরা\\s+চলে\\s+গেছে)", "i");
+  var REMEMBER_RE = new RegExp("^\\s*(?:" + NAMES + "[,\\s]*)?(?:याद\\s*रखो|yaad\\s*rakho|remember\\s+that|মনে\\s*রাখো)[:,\\s]+(.+)$", "i");
+  var NOTE_RE = new RegExp("^\\s*(?:" + NAMES + "[,\\s]*)?(?:नोट\\s*करो|note\\s+this|note\\s*:|নোট\\s*করো)[:,\\s]+(.+)$", "i");
+  var ACK = {
+    off: { "hi-IN": "ठीक है अभि, मैं बंद हो रहा हूँ", "en-IN": "Okay Abhi, I'm shutting down", "bn-IN": "ঠিক আছে অভি, আমি বন্ধ হচ্ছি" },
+    quiet: { "hi-IN": "ठीक है अभि, मैं शांत हूँ", "en-IN": "Okay Abhi, I'm quiet now", "bn-IN": "ঠিক আছে অভি, আমি চুপ করছি" },
+    wake: { "hi-IN": "हाँ अभि, मैं वापस आ गया! बोलो", "en-IN": "I'm back, Abhi! Go ahead", "bn-IN": "হ্যাঁ অভি, আমি ফিরে এসেছি! বলো" },
+    mem: { "hi-IN": "ठीक है अभि, याद रख लिया", "en-IN": "Got it Abhi, I'll remember that", "bn-IN": "ঠিক আছে অভি, মনে রাখলাম" },
+    note: { "hi-IN": "नोट कर लिया अभि", "en-IN": "Noted, Abhi", "bn-IN": "নোট করে নিলাম অভি" }
+  };
+  var START_SAY = "Hi Abhi! I'm listening. Go ahead.";
+  var GREETING = "Hi Abhi! I'm Jarvis. Tap Start AI below and I'll keep listening.";
+  var LANG_CYCLE = ["auto", "hi-IN", "en-IN", "bn-IN"];
+  var LANG_NAMES = { "auto": "Auto", "hi-IN": "Hindi", "en-IN": "English", "bn-IN": "Bengali" };
+  var FATAL_REC = { "not-allowed": 1, "service-not-allowed": 1, "network": 1, "audio-capture": 1, "language-not-supported": 1 };
+
+  var ICONS = {
+    mic: ["M12 3a3 3 0 0 0-3 3v6a3 3 0 0 0 6 0V6a3 3 0 0 0-3-3z", "M19 11a7 7 0 0 1-14 0", "M12 18v3"],
+    stop: ["M7 7h10v10H7z"],
+    send: ["M22 2L11 13", "M22 2l-7 20-4-9-9-4 20-7z"],
+    power: ["M12 2v10", "M18.4 6.6a9 9 0 1 1-12.8 0"],
+    brain: ["M9 4a3 3 0 0 0-3 3 3 3 0 0 0-2 5 3 3 0 0 0 2 5 3 3 0 0 0 5 1V4a3 3 0 0 0-2 0z", "M15 4a3 3 0 0 1 3 3 3 3 0 0 1 2 5 3 3 0 0 1-2 5 3 3 0 0 1-5 1"],
+    bolt: ["M13 2L4 14h7l-1 8 9-12h-7l1-8z"],
+    user: ["M20 21a8 8 0 0 0-16 0", "M12 11a4 4 0 1 0 0-8 4 4 0 0 0 0 8z"],
+    gear: ["M12 15a3 3 0 1 0 0-6 3 3 0 0 0 0 6z", "M19.4 15a1.7 1.7 0 0 0 .3 1.8l.1.1a2 2 0 1 1-2.8 2.8l-.1-.1a1.7 1.7 0 0 0-1.8-.3 1.7 1.7 0 0 0-1 1.5V21a2 2 0 1 1-4 0v-.1a1.7 1.7 0 0 0-1.1-1.5 1.7 1.7 0 0 0-1.8.3l-.1.1a2 2 0 1 1-2.8-2.8l.1-.1a1.7 1.7 0 0 0 .3-1.8 1.7 1.7 0 0 0-1.5-1H3a2 2 0 1 1 0-4h.1a1.7 1.7 0 0 0 1.5-1.1 1.7 1.7 0 0 0-.3-1.8l-.1-.1a2 2 0 1 1 2.8-2.8l.1.1a1.7 1.7 0 0 0 1.8.3H9a1.7 1.7 0 0 0 1-1.5V3a2 2 0 1 1 4 0v.1a1.7 1.7 0 0 0 1 1.5 1.7 1.7 0 0 0 1.8-.3l.1-.1a2 2 0 1 1 2.8 2.8l-.1.1a1.7 1.7 0 0 0-.3 1.8V9a1.7 1.7 0 0 0 1.5 1H21a2 2 0 1 1 0 4h-.1a1.7 1.7 0 0 0-1.5 1z"],
+    close: ["M6 6l12 12", "M18 6L6 18"]
+  };
+  function Icon(p) {
+    return h("svg", { width: p.size || 22, height: p.size || 22, viewBox: "0 0 24 24", fill: "none", stroke: "currentColor", strokeWidth: 2, strokeLinecap: "round", strokeLinejoin: "round", "aria-hidden": "true" },
+      ICONS[p.name].map(function (d, i) { return h("path", { key: i, d: d }); }));
+  }
+
+  /* ---------------- helpers ---------------- */
+  function lsGet(k) { try { return localStorage.getItem(k); } catch (e) { return null; } }
+  function lsSet(k, v) { try { localStorage.setItem(k, v); } catch (e) {} }
+  function loadSaved() {
+    try { var raw = lsGet("jarvis_v4") || lsGet("jarvis_v3"); var o = raw ? JSON.parse(raw) : {}; return o && typeof o === "object" ? o : {}; } catch (e) { return {}; }
+  }
+  function hasDevanagari(s) { return /[ऀ-ॿ]/.test(s); }
+  function scriptLang(s) { return /[ঀ-৿]/.test(s) ? "bn-IN" : hasDevanagari(s) ? "hi-IN" : "en-IN"; }
+  function cleanForSpeech(s) { return s.replace(/\[([^\]]*)\]\([^)]*\)/g, "$1").replace(/[*_`#>~]/g, "").replace(/\s+/g, " ").trim(); }
+  function clamp(v, a, b) { return Math.min(b, Math.max(a, v)); }
+  var FEM_RE = /female|woman|swara|heera|kalpana|neerja|priya|veena|zira|samantha|aria|jenny|karen|tessa|pallavi|tanishaa|nabanita|shreya/i;
+  var MAL_RE = /\bmale\b|madhur|hemant|ravi|prabhat|david|guy|mark|james|bashkar|pradeep/i;
+  function pickVoice(l, g) {
+    if (!("speechSynthesis" in window)) return null;
+    var vs = speechSynthesis.getVoices(), best = null, bs = -1, i;
+    for (i = 0; i < vs.length; i++) {
+      var vl = vs[i].lang.replace("_", "-").toLowerCase(), s = -1, nm = vs[i].name;
+      if (vl === l.toLowerCase()) s = 2; else if (vl.indexOf(l.slice(0, 2).toLowerCase()) === 0) s = 1;
+      if (s < 0) continue;
+      if (/google|neural|natural|online/i.test(nm)) s += 2;
+      var fem = FEM_RE.test(nm), mal = !fem && MAL_RE.test(nm);
+      if (g === "f" && fem) s += 3; if (g === "m" && mal) s += 3;
+      if (g === "f" && mal) s -= 2; if (g === "m" && fem) s -= 2;
+      if (s > bs) { bs = s; best = vs[i]; }
+    }
+    return best;
+  }
+
+  function askGemini(key, model, turns, system) {
+    var body = {
+      systemInstruction: { parts: [{ text: system }] },
+      contents: turns.map(function (t) { return { role: t.role === "assistant" ? "model" : "user", parts: [{ text: t.content }] }; }),
+      generationConfig: { temperature: 0.8, maxOutputTokens: 1024 }
+    };
+    return fetch("https://generativelanguage.googleapis.com/v1beta/models/" + encodeURIComponent(model) + ":generateContent", {
+      method: "POST", headers: { "Content-Type": "application/json", "x-goog-api-key": key }, body: JSON.stringify(body)
+    }).then(function (res) {
+      return res.json().catch(function () { return {}; }).then(function (data) {
+        if (!res.ok) { var err = new Error((data.error && data.error.message) || ("HTTP " + res.status)); err.http = res.status; throw err; }
+        var c = data.candidates && data.candidates[0];
+        var parts = c && c.content && c.content.parts;
+        var text = parts ? parts.map(function (p) { return p.text || ""; }).join("").trim() : "";
+        if (!text) { var e2 = new Error("Gemini returned an empty reply. Please ask again."); e2.http = 0; throw e2; }
+        return text;
+      });
+    });
+  }
+  function errText(e) {
+    if (e && e.code) {
+      var map = { not_granted: "Permission to use Claude was not granted.", rate_limited: "Too many requests right now. Please try again in a moment.", session_expired: "Please sign in again, then try once more.", sampling_disabled: "Claude isn't available on this account." };
+      return map[e.code] || "Couldn't get a reply. Please try once more.";
+    }
+    var m = (e && e.message) || "";
+    if (e && e.http === 400 && /api key/i.test(m)) return "Gemini API key doesn't look right. Paste it again in Settings.";
+    if (e && (e.http === 401 || e.http === 403)) return "Gemini rejected the key (" + e.http + "). Check the key and its permissions.";
+    if (e && e.http === 404) return "Model not found. Enter a different model name in Settings.";
+    if (e && e.http === 429) return "Gemini's limit was reached. Please try again shortly.";
+    return m || "Something went wrong. Please try again.";
+  }
+
+  /* ---------------- 3D particle stage ---------------- */
+  var NP = 950;
+  function buildShapes() {
+    var core = new Float32Array(NP * 3), fem = new Float32Array(NP * 3), mal = new Float32Array(NP * 3), i, ga = Math.PI * (3 - Math.sqrt(5));
+    var ringN = Math.floor(NP * 0.2);
+    for (i = 0; i < NP; i++) {
+      var y = 1 - (i / (NP - 1)) * 2, r = Math.sqrt(Math.max(0, 1 - y * y)), th = ga * i;
+      var x = Math.cos(th) * r, z = Math.sin(th) * r;
+      core[i * 3] = x; core[i * 3 + 1] = y; core[i * 3 + 2] = z;
+      if (i < NP - ringN) { fem[i * 3] = x * 0.86; fem[i * 3 + 1] = y * 0.86; fem[i * 3 + 2] = z * 0.86; }
+      else {
+        var k = i - (NP - ringN), a = (k / ringN) * Math.PI * 2, rr = 1.32 + 0.06 * Math.sin(k * 1.7);
+        var rx = Math.cos(a) * rr, rz = Math.sin(a) * rr, tilt = 0.42;
+        fem[i * 3] = rx; fem[i * 3 + 1] = rz * Math.sin(tilt); fem[i * 3 + 2] = rz * Math.cos(tilt);
+      }
+      var m = Math.max(Math.abs(x), Math.abs(y), Math.abs(z)) || 1, cube = 1 / m;
+      var f = 0.45 + 0.55 * cube; /* blend between sphere and cube projection */
+      mal[i * 3] = x * f * 0.9; mal[i * 3 + 1] = y * f * 0.9; mal[i * 3 + 2] = z * f * 0.9;
+    }
+    return [core, fem, mal];
+  }
+
+  function Stage(props) {
+    var live = props.live, cards = props.cards;
+    var wrapRef = useRef(null), cvRef = useRef(null), nodeRefs = useRef([]);
+    useEffect(function () {
+      var cv = cvRef.current, wrap = wrapRef.current, ctx = cv.getContext("2d");
+      var shapes = buildShapes(), phase = new Float32Array(NP), i;
+      for (i = 0; i < NP; i++) phase[i] = Math.random() * 6.283;
+      var wts = [1, 0, 0], lvl = 0, w = 0, ht = 0, dpr = 1, raf = 0, color = [61, 220, 255], dim = 0.45, spinA = 0, lastT = 0;
+      var rm = window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+      function resize() {
+        var r = wrap.getBoundingClientRect();
+        dpr = Math.min(window.devicePixelRatio || 1, 2);
+        w = r.width; ht = r.height;
+        cv.width = Math.max(1, Math.round(w * dpr)); cv.height = Math.max(1, Math.round(ht * dpr));
+      }
+      resize();
+      var ro = window.ResizeObserver ? new ResizeObserver(resize) : null;
+      if (ro) ro.observe(wrap); else window.addEventListener("resize", resize);
+
+      function frame(ts) {
+        raf = requestAnimationFrame(frame);
+        var L = live.current, t = ts / 1000, dt = Math.min(0.05, t - lastT || 0.016); lastT = t;
+        var cx = w / 2, cy = ht / 2, R = Math.min(w * 0.27, ht * 0.25);
+        ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+        ctx.clearRect(0, 0, w, ht);
+
+        var ti = AV_KEYS.indexOf(L.avatar), k;
+        for (k = 0; k < 3; k++) wts[k] += ((k === ti ? 1 : 0) - wts[k]) * 0.07;
+        var base = AV[L.avatar].rgb, tgt = L.quiet ? QUIET_RGB : base;
+        for (k = 0; k < 3; k++) color[k] += (tgt[k] - color[k]) * 0.08;
+        dim += ((L.on ? 1 : 0.42) - dim) * 0.08;
+
+        var target = 0;
+        if (L.on) {
+          if (L.speaking) target = 0.42 + 0.32 * Math.abs(Math.sin(t * 9.1) * Math.sin(t * 3.3 + 1)) + L.kick * 0.35;
+          else if (L.want && !L.quiet) target = 0.3 + 0.08 * Math.sin(t * 5);
+          else if (L.busy) target = 0.18;
+        }
+        L.kick *= 0.9;
+        lvl += (target - lvl) * 0.12;
+        var motion = rm ? 0.2 : 1;
+        spinA += dt * (L.on ? 0.32 : 0.14) * (1 + lvl * 1.6) * motion;
+        var breathe = 1 + (L.on ? 0.035 : 0.05) * Math.sin(t * (L.on ? 1.1 : 0.7)) * motion;
+        var sy = Math.sin(spinA), cyy = Math.cos(spinA), tx = 0.3 + 0.1 * Math.sin(t * 0.3) * motion, stx = Math.sin(tx), ctx2 = Math.cos(tx);
+
+        /* circuit lines from the core to each card */
+        var wr = wrap.getBoundingClientRect(), pulseSpd = (0.12 + lvl * 0.9) * (L.on ? 1 : 0.25) * motion;
+        for (k = 0; k < 4; k++) {
+          var el = nodeRefs.current[k]; if (!el) continue;
+          var nr = el.getBoundingClientRect(), ncx = nr.left - wr.left + nr.width / 2, ncy = nr.top - wr.top + nr.height / 2;
+          var ax = ncx < cx ? nr.right - wr.left - 14 : nr.left - wr.left + 14, ay = ncy < cy ? nr.bottom - wr.top : nr.top - wr.top;
+          var ang = Math.atan2(ay - cy, ax - cx), sx = cx + Math.cos(ang) * R * 1.12, sy2 = cy + Math.sin(ang) * R * 1.12;
+          var pts = [[sx, sy2], [ax, sy2], [ax, ay]];
+          ctx.lineWidth = 1.5; ctx.lineJoin = "round";
+          ctx.strokeStyle = "rgba(" + (color[0] | 0) + "," + (color[1] | 0) + "," + (color[2] | 0) + "," + (0.12 + 0.3 * dim * (0.6 + lvl)) + ")";
+          ctx.beginPath(); ctx.moveTo(pts[0][0], pts[0][1]); ctx.lineTo(pts[1][0], pts[1][1]); ctx.lineTo(pts[2][0], pts[2][1]); ctx.stroke();
+          var l1 = Math.abs(pts[1][0] - pts[0][0]), l2 = Math.abs(pts[2][1] - pts[1][1]), tot = l1 + l2 || 1;
+          var u = ((t * pulseSpd + k * 0.27) % 1) * tot, px, py;
+          if (u < l1) { px = pts[0][0] + (pts[1][0] - pts[0][0]) * (u / (l1 || 1)); py = pts[0][1]; }
+          else { px = pts[1][0]; py = pts[1][1] + (pts[2][1] - pts[1][1]) * ((u - l1) / (l2 || 1)); }
+          ctx.fillStyle = "rgba(" + (color[0] | 0) + "," + (color[1] | 0) + "," + (color[2] | 0) + "," + (0.5 + 0.5 * dim) + ")";
+          ctx.beginPath(); ctx.arc(px, py, 3, 0, 6.283); ctx.fill();
+          ctx.beginPath(); ctx.arc(ax, ay, 2.6, 0, 6.283); ctx.fill();
+          ctx.beginPath(); ctx.arc(sx, sy2, 2.6, 0, 6.283); ctx.fill();
         }
 
-        function sendMessage() {
-            const inputField = document.getElementById("user-input");
-            const userText = inputField.value.trim();
+        /* core glow */
+        var gr = ctx.createRadialGradient(cx, cy, 0, cx, cy, R * (1.6 + lvl));
+        var ga = (0.1 + lvl * 0.4) * dim;
+        gr.addColorStop(0, "rgba(" + (color[0] | 0) + "," + (color[1] | 0) + "," + (color[2] | 0) + "," + ga + ")");
+        gr.addColorStop(1, "rgba(" + (color[0] | 0) + "," + (color[1] | 0) + "," + (color[2] | 0) + ",0)");
+        ctx.fillStyle = gr; ctx.fillRect(0, 0, w, ht);
 
-            if (userText === "") return;
-
-            addMessage(userText, "user");
-            inputField.value = "";
-
-            setTimeout(() => {
-                const botReply = generateReply(userText.toLowerCase());
-                addMessage(botReply, "bot");
-            }, 400);
+        /* listening ripple */
+        if (L.on && L.want && !L.quiet && !L.speaking) {
+          var rp = (t * 0.7) % 1;
+          ctx.strokeStyle = "rgba(" + (color[0] | 0) + "," + (color[1] | 0) + "," + (color[2] | 0) + "," + (0.35 * (1 - rp)) + ")";
+          ctx.lineWidth = 2; ctx.beginPath(); ctx.arc(cx, cy, R * (1.1 + rp * 0.7), 0, 6.283); ctx.stroke();
         }
 
-        function addMessage(text, sender) {
-            const chatBox = document.getElementById("chat-box");
-            const msgDiv = document.createElement("div");
-            msgDiv.className = "msg " + sender;
-            msgDiv.innerText = text;
-            chatBox.appendChild(msgDiv);
-            chatBox.scrollTop = chatBox.scrollHeight;
+        /* particles */
+        ctx.globalCompositeOperation = "lighter";
+        var rr = (color[0] | 0), gg = (color[1] | 0), bb = (color[2] | 0), s0 = shapes[0], s1 = shapes[1], s2 = shapes[2];
+        var speakJit = L.speaking ? 10 : 3, amp = 0.025 + lvl * 0.3;
+        for (i = 0; i < NP; i++) {
+          var i3 = i * 3;
+          var x = s0[i3] * wts[0] + s1[i3] * wts[1] + s2[i3] * wts[2];
+          var y = s0[i3 + 1] * wts[0] + s1[i3 + 1] * wts[1] + s2[i3 + 1] * wts[2];
+          var z = s0[i3 + 2] * wts[0] + s1[i3 + 2] * wts[1] + s2[i3 + 2] * wts[2];
+          var d = breathe + amp * Math.sin(phase[i] * 3 + t * speakJit * motion + i * 0.05);
+          x *= d; y *= d; z *= d;
+          var x1 = x * cyy + z * sy, z1 = -x * sy + z * cyy;
+          var y2 = y * ctx2 - z1 * stx, z2 = y * stx + z1 * ctx2;
+          var f = 3 / (3 - z2), px2 = cx + x1 * R * f, py2 = cy + y2 * R * f;
+          var depth = (z2 + 1.4) / 2.8;
+          var a = (0.18 + 0.82 * depth) * (0.55 + lvl * 0.9) * dim;
+          var sz = (1 + 1.6 * depth) * (1 + lvl * 0.7);
+          ctx.fillStyle = "rgba(" + rr + "," + gg + "," + bb + "," + clamp(a, 0, 1) + ")";
+          ctx.fillRect(px2 - sz / 2, py2 - sz / 2, sz, sz);
         }
+        ctx.globalCompositeOperation = "source-over";
+      }
+      raf = requestAnimationFrame(frame);
+      return function () { cancelAnimationFrame(raf); if (ro) ro.disconnect(); else window.removeEventListener("resize", resize); };
+    }, []);
 
-        function generateReply(msg) {
-            if (msg.includes("<script>") || msg.includes("javascript:")) {
-                return "⚠️ सुरक्षा चेतावनी: गलत कोड ब्लॉक कर दिया गया है।";
-            }
-            if (msg.includes("hello") || msg.includes("hi") || msg.includes("नमस्ते")) {
-                return "नमस्ते! बताइए आज मैं आपके लिए क्या कर सकता हूं?";
-            } 
-            if (msg.includes("नाम") || msg.includes("name")) {
-                return "मेरा नाम Jarvis AI है।";
-            } 
-            if (msg.includes("समय") || msg.includes("time")) {
-                return "अभी समय है: " + new Date().toLocaleTimeString('hi-IN');
-            } 
-            if (msg.includes("तारीख") || msg.includes("date")) {
-                return "आज की तारीख है: " + new Date().toLocaleDateString('hi-IN');
-            }
-            return "आपने कहा: '" + msg + "'। मैं अभी सीख रहा हूं, जल्द ही और स्मार्ट बनूंगा!";
+    return h("div", { className: "stage", ref: wrapRef },
+      h("canvas", { ref: cvRef, role: "img", "aria-label": props.label }),
+      cards.map(function (c, i) {
+        return h("button", { key: c.id, type: "button", className: "node " + c.pos, ref: function (el) { nodeRefs.current[i] = el; }, onClick: c.onClick, "aria-haspopup": "dialog", "aria-expanded": String(!!c.open) },
+          h(Icon, { name: c.icon, size: 24 }),
+          h("span", { className: "tx" }, h("b", null, c.label), h("small", null, c.sub)));
+      }));
+  }
+
+  /* ---------------- app ---------------- */
+  function App() {
+    var saved = useState(loadSaved)[0];
+    var s = function (v) { return useState(v); };
+    var m = s(function () { return Array.isArray(saved.msgs) && saved.msgs.length ? saved.msgs : [{ id: 0, role: "assistant", greeting: true, local: true, text: GREETING }]; }), msgs = m[0], setMsgs = m[1];
+    var a1 = s(typeof saved.key === "string" ? saved.key : ""), key = a1[0], setKey = a1[1];
+    var a2 = s(saved.model || "gemini-2.5-flash"), model = a2[0], setModel = a2[1];
+    var a3 = s(typeof saved.elKey === "string" ? saved.elKey : ""), elKey = a3[0], setElKey = a3[1];
+    var a4 = s(typeof saved.voiceId === "string" ? saved.voiceId : ""), voiceId = a4[0], setVoiceId = a4[1];
+    var a5 = s(typeof saved.speed === "number" ? saved.speed : 1), speed = a5[0], setSpeed = a5[1];
+    var a6 = s(saved.lang || "auto"), lang = a6[0], setLang = a6[1];
+    var a7 = s(saved.speakOn === false ? false : true), speakOn = a7[0], setSpeakOn = a7[1];
+    var a8 = s(Array.isArray(saved.memory) ? saved.memory : []), memory = a8[0], setMemory = a8[1];
+    var a9 = s(typeof saved.summary === "string" ? saved.summary : ""), summary = a9[0], setSummary = a9[1];
+    var b1 = s(CHARS[saved.character] ? saved.character : "jarvis"), character = b1[0], setCharacter = b1[1];
+    var b2 = s(AV[saved.avatar] ? saved.avatar : "core"), avatar = b2[0], setAvatar = b2[1];
+    var b3 = s(SKILLS[saved.skill] && SKILLS[saved.skill].prompt ? saved.skill : null), skill = b3[0], setSkill = b3[1];
+    var c1 = s(false), on = c1[0], setOn = c1[1];
+    var c2 = s(false), quiet = c2[0], setQuiet = c2[1];
+    var c3 = s(false), want = c3[0], setWant = c3[1];
+    var c4 = s(false), speaking = c4[0], setSpeaking = c4[1];
+    var c5 = s(false), busy = c5[0], setBusy = c5[1];
+    var c6 = s(""), input = c6[0], setInput = c6[1];
+    var c7 = s(""), partial = c7[0], setPartial = c7[1];
+    var c8 = s(""), note = c8[0], setNote = c8[1];
+    var c9 = s(null), panel = c9[0], setPanel = c9[1];
+    var d1 = s(function () { return (window.SpeechRecognition || window.webkitSpeechRecognition) ? "browser" : "none"; }), micMode = d1[0], setMicMode = d1[1];
+    var d2 = s(false), hasClaude = d2[0], setHasClaude = d2[1];
+    var d3 = s(false), blocked = d3[0], setBlocked = d3[1];
+    var d4 = s(false), showKey = d4[0], setShowKey = d4[1];
+    var d5 = s(""), memDraft = d5[0], setMemDraft = d5[1];
+    var d6 = s(false), confirmForget = d6[0], setConfirmForget = d6[1];
+    var d7 = s(false), sumBusy = d7[0], setSumBusy = d7[1];
+    var d8 = s(false), elBad = d8[0], setElBad = d8[1];
+
+    var live = useRef({ on: false, quiet: false, want: false, speaking: false, busy: false, avatar: "core", kick: 0 });
+    var R = useRef({}), api = useRef({});
+    var msgsRef = useRef(msgs), busyRef = useRef(false), onRef = useRef(false), quietRef = useRef(false), wantRef = useRef(false);
+    var blockedRef = useRef(false), elBlockedRef = useRef(false), sampleRef = useRef(null), dictRef = useRef(null), recRef = useRef(null);
+    var bufRef = useRef(""), timerRef = useRef(null), speakingRef = useRef(false), muteUntilRef = useRef(0), tokRef = useRef(0);
+    var lastRef = useRef({ norm: "", t: 0 }), fatalRef = useRef(false), notesRef = useRef(false), audioRef = useRef(null), turnsRef = useRef(0);
+    var idRef = useRef(msgs.reduce(function (x, y) { return Math.max(x, y.id || 0); }, 0)), chatRef = useRef(null);
+
+    R.current = { key: key, model: model, elKey: elKey, voiceId: voiceId, speed: speed, lang: lang, speakOn: speakOn, memory: memory, summary: summary, character: character, avatar: avatar, skill: skill, micMode: micMode };
+    msgsRef.current = msgs;
+    var L = live.current; L.on = on; L.quiet = quiet; L.want = want && on; L.speaking = speaking; L.busy = busy; L.avatar = avatar;
+
+    useEffect(function () { var c = chatRef.current; if (c) c.scrollTop = c.scrollHeight; }, [msgs, busy]);
+    useEffect(function () {
+      lsSet("jarvis_v4", JSON.stringify({
+        key: key, model: model, elKey: elKey, voiceId: voiceId, speed: speed, lang: lang, speakOn: speakOn, memory: memory, summary: summary, character: character, avatar: avatar, skill: skill,
+        msgs: msgs.slice(-60).map(function (x) { return { id: x.id, role: x.role, text: x.text, via: x.via, error: x.error, greeting: x.greeting, local: x.local }; })
+      }));
+    }, [key, model, elKey, voiceId, speed, lang, speakOn, memory, summary, character, avatar, skill, msgs]);
+    useEffect(function () {
+      if (!panel) return;
+      function onEsc(e) { if (e.key === "Escape") setPanel(null); }
+      window.addEventListener("keydown", onEsc);
+      return function () { window.removeEventListener("keydown", onEsc); };
+    }, [panel]);
+
+    useEffect(function () {
+      var offs = [], dead = false;
+      if (window.claude && window.claude.use) {
+        window.claude.use("dictation").then(function (d) {
+          if (dead || !d) return;
+          dictRef.current = d; setMicMode("dictation");
+          offs.push(d.onPartial(function (e) { api.current.partial(e.text || ""); }));
+          offs.push(d.onFinal(function (e) { api.current.pushFinal(e.text || ""); }));
+          offs.push(d.onState(function (e) { if (e.state === "idle") api.current.dictIdle(e.reason); }));
+        }).catch(function () {});
+        window.claude.use("sample").then(function (sm) { if (dead || !sm) return; sampleRef.current = sm; setHasClaude(true); }).catch(function () {});
+      }
+      if ("speechSynthesis" in window) { try { speechSynthesis.getVoices(); } catch (e) {} }
+      return function () { dead = true; offs.forEach(function (f) { f && f(); }); };
+    }, []);
+
+    /* ----- input gate: nothing is accepted while Jarvis speaks or thinks ----- */
+    function mutedNow() { return speakingRef.current || busyRef.current || Date.now() < muteUntilRef.current; }
+    function clearBuf() { clearTimeout(timerRef.current); bufRef.current = ""; setPartial(""); }
+    function flush() { var t = bufRef.current.trim(); bufRef.current = ""; setPartial(""); if (t) send(t); }
+    function pushFinal(t) {
+      if (!onRef.current || mutedNow() || !t) return;
+      bufRef.current = (bufRef.current + " " + t).trim();
+      if (!quietRef.current) setInput(bufRef.current);
+      clearTimeout(timerRef.current);
+      timerRef.current = setTimeout(function () { api.current.flush(); }, 1300);
+    }
+    function partialText(t) { if (!mutedNow() && !quietRef.current && onRef.current) setPartial(t); }
+    function dictIdle(reason) {
+      if (!wantRef.current) return;
+      wantRef.current = false; setWant(false); api.current.flush();
+      var msg = { hidden: "Listening stopped because the page was hidden. Tap the mic again.", time_limit: "Listening time limit reached. Tap the mic again.", viewer_stopped: "Listening was stopped.", not_granted: "Microphone permission wasn't granted. You can type instead.", unavailable: "Voice input isn't available in this view. Please type.", rate_limited: "Please tap the mic again in a moment.", upstream_error: "Had trouble hearing you. Tap the mic again." }[reason];
+      if (msg) setNote(msg);
+    }
+
+    /* ----- speech out: ElevenLabs when a key is set, otherwise the phone's best voice ----- */
+    function abortRec() { var r = recRef.current; if (r) { recRef.current = null; try { r.onend = null; r.abort(); } catch (e) {} } }
+    function resumeRec(delay) { if (wantRef.current && R.current.micMode === "browser" && onRef.current) setTimeout(function () { api.current.startRec(); }, delay); }
+    function stopAudio() {
+      var a = audioRef.current;
+      if (a) { audioRef.current = null; try { a.onended = null; a.onerror = null; a.pause(); } catch (e) {} if (a._url) URL.revokeObjectURL(a._url); }
+    }
+    function elSpeak(text, tok, done) {
+      var cfg = R.current, vid = cfg.voiceId.trim() || AV[cfg.avatar].el;
+      return fetch("https://api.elevenlabs.io/v1/text-to-speech/" + encodeURIComponent(vid) + "?output_format=mp3_44100_128", {
+        method: "POST", headers: { "Content-Type": "application/json", "xi-api-key": cfg.elKey, "Accept": "audio/mpeg" },
+        body: JSON.stringify({ text: text, model_id: "eleven_multilingual_v2", voice_settings: { stability: 0.45, similarity_boost: 0.8, speed: clamp(cfg.speed, 0.7, 1.2) } })
+      }).then(function (res) {
+        if (!res.ok) { var e = new Error("HTTP " + res.status); e.http = res.status; throw e; }
+        return res.blob();
+      }).then(function (blob) {
+        if (tok !== tokRef.current) return true;
+        var url = URL.createObjectURL(blob), au = new Audio(url);
+        au._url = url; audioRef.current = au;
+        au.onended = function () { stopAudio(); done(); };
+        au.onerror = function () { stopAudio(); done(); };
+        return au.play().then(function () { return true; });
+      }).catch(function (e) {
+        stopAudio();
+        if (e instanceof TypeError) { elBlockedRef.current = true; setElBad(true); setNote("This page can't reach ElevenLabs, so your phone's voice is being used."); }
+        else if (e && (e.http === 401 || e.http === 403)) { elBlockedRef.current = true; setElBad(true); setNote("The ElevenLabs key was rejected, so your phone's voice is being used."); }
+        else if (e && e.http) setNote("Couldn't get audio from ElevenLabs (" + e.http + "), so your phone's voice is being used.");
+        return false;
+      });
+    }
+    function browserSpeak(text, l, tok, done) {
+      if (!("speechSynthesis" in window)) { done(); return; }
+      var cfg = R.current, av = AV[cfg.avatar], u = new SpeechSynthesisUtterance(text);
+      u.lang = l; u.rate = clamp(cfg.speed * (l === "hi-IN" ? 0.95 : 1), 0.5, 1.6); u.pitch = av.pitch;
+      var v = pickVoice(l, av.g);
+      if (v) u.voice = v; else if (speechSynthesis.getVoices().length) setNote("No " + LANG_NAMES[l] + " voice was found on this device, so the default voice is being used.");
+      u.onboundary = function () { live.current.kick = 1; };
+      u.onend = done; u.onerror = done;
+      speechSynthesis.cancel(); speechSynthesis.speak(u);
+    }
+    function speak(text) {
+      var clean = cleanForSpeech(text); if (!clean) return;
+      var l = scriptLang(clean), tok = ++tokRef.current;
+      speakingRef.current = true; setSpeaking(true); clearBuf(); abortRec(); stopAudio();
+      if ("speechSynthesis" in window) speechSynthesis.cancel();
+      function done() {
+        if (tok !== tokRef.current) return;
+        speakingRef.current = false; muteUntilRef.current = Date.now() + 800; setSpeaking(false);
+        resumeRec(600);
+      }
+      /* Bengali is not in eleven_multilingual_v2's language list, so it always uses the phone voice. */
+      if (R.current.elKey && l !== "bn-IN" && !elBlockedRef.current) {
+        elSpeak(clean, tok, done).then(function (ok) { if (!ok && tok === tokRef.current) browserSpeak(clean, l, tok, done); });
+      } else browserSpeak(clean, l, tok, done);
+    }
+    function stopSpeaking() {
+      tokRef.current++; stopAudio();
+      if ("speechSynthesis" in window) speechSynthesis.cancel();
+      var was = speakingRef.current; speakingRef.current = false; setSpeaking(false);
+      if (was) resumeRec(300);
+    }
+
+    /* ----- mic in: continuous while AI is running ----- */
+    function startRec() {
+      if (recRef.current || !wantRef.current || speakingRef.current || !onRef.current) return;
+      var SR = window.SpeechRecognition || window.webkitSpeechRecognition; if (!SR) return;
+      var r = new SR(); recRef.current = r;
+      r.lang = R.current.lang === "auto" ? "hi-IN" : R.current.lang; r.interimResults = true; r.continuous = true;
+      var done = 0;
+      r.onresult = function (ev) {
+        var interim = "";
+        for (var i = ev.resultIndex; i < ev.results.length; i++) {
+          var res = ev.results[i];
+          if (res.isFinal) { if (i >= done) { done = i + 1; api.current.pushFinal(res[0].transcript); } } else interim += res[0].transcript;
         }
-    </script>
+        api.current.partial(interim);
+      };
+      r.onerror = function (ev) {
+        if (FATAL_REC[ev.error]) {
+          fatalRef.current = true; wantRef.current = false; setWant(false);
+          setNote(ev.error === "not-allowed" || ev.error === "service-not-allowed" ? "The browser denied microphone access. You can type instead." : "Speech recognition problem (" + ev.error + "). Tap the mic again.");
+        }
+      };
+      r.onend = function () {
+        if (recRef.current === r) recRef.current = null;
+        if (wantRef.current && !fatalRef.current && !speakingRef.current && onRef.current) setTimeout(function () { api.current.startRec(); }, 250);
+      };
+      try { r.start(); } catch (e) { recRef.current = null; }
+    }
+    function startListening() {
+      var mm = R.current.micMode; if (mm === "none") return;
+      wantRef.current = true; setWant(true); setNote(""); fatalRef.current = false;
+      if (mm === "dictation") {
+        var d = dictRef.current; if (!d || d.active()) return;
+        var lg = R.current.lang;
+        d.start(lg === "auto" ? undefined : { language: lg.slice(0, 2) }).catch(function (e) {
+          if (e && e.code === "stopped") return;
+          wantRef.current = false; setWant(false);
+          if (e && e.code === "not_granted") setNote("Microphone permission wasn't granted. You can type instead.");
+          else if (e && e.code === "unavailable") {
+            if (R.current.lang !== "auto") { setLang("auto"); setNote("That language isn't available here. Switched to Auto; tap the mic again."); }
+            else setNote("Voice input isn't available in this view. Please type.");
+          } else if (e && e.code !== "dismissed") setNote("Couldn't start the microphone. Please try again.");
+        });
+      } else startRec();
+    }
+    function stopListening() {
+      wantRef.current = false; setWant(false); clearBuf();
+      var d = dictRef.current; if (d && d.active()) d.stop().catch(function () {});
+      abortRec();
+    }
 
-</body>
-</html>
+    /* ----- messages, commands, AI ----- */
+    function addMsg(role, text, extra) {
+      idRef.current += 1;
+      var o = { id: idRef.current, role: role, text: text };
+      if (extra) for (var k in extra) o[k] = extra[k];
+      setMsgs(function (p) { return p.concat(o); });
+    }
+    function botSay(text, local) { addMsg("assistant", text, local ? { local: true } : null); if (R.current.speakOn) speak(text); }
+    function dup(text) {
+      var norm = text.toLowerCase().replace(/[\s.,!?।]+/g, " ").trim(), now = Date.now();
+      if (lastRef.current.norm === norm && now - lastRef.current.t < 5000) return true;
+      lastRef.current = { norm: norm, t: now }; return false;
+    }
+    function ask(turns, system) {
+      var cfg = R.current, chain = Promise.resolve(), out = null;
+      if (cfg.key && !blockedRef.current) {
+        chain = askGemini(cfg.key, cfg.model, turns, system).then(function (t) { out = { text: t, via: "Gemini" }; }).catch(function (e) {
+          if (e instanceof TypeError) { blockedRef.current = true; setBlocked(true); return; }
+          throw e;
+        });
+      }
+      return chain.then(function () {
+        if (out) return out;
+        var sm = sampleRef.current;
+        if (!sm) throw new Error(blockedRef.current ? "This page can't reach Gemini from here." : "Paste your Gemini API key in Settings first.");
+        return sm([{ role: "user", content: system }].concat(turns), { cache: false, modelTier: "quick" }).then(function (r) { return { text: r.text, via: "Claude" }; });
+      });
+    }
+    function summarize(silent) {
+      var recent = msgsRef.current.filter(function (x) { return !x.greeting && !x.error && !x.local; }).slice(-30);
+      if (!recent.length) { if (!silent) setNote("There isn't enough conversation to summarize yet."); return; }
+      if (!silent) setSumBusy(true);
+      var lines = recent.map(function (x) { return (x.role === "user" ? "Abhi: " : "Jarvis: ") + x.text; }).join("\n");
+      var prompt = (R.current.summary ? "Earlier summary:\n" + R.current.summary + "\n\n" : "") + "Recent conversation:\n" + lines + "\n\nWrite an updated summary in 3 to 5 short lines, in Hindi, about Abhi (his mood, interests, plans, anything personal) and what we talked about. Plain text, no markdown.";
+      ask([{ role: "user", content: prompt }], "You write compact, kind conversation summaries.").then(function (r) { setSummary(r.text.trim()); }).catch(function (e) { if (!silent) setNote(errText(e)); }).then(function () { setSumBusy(false); });
+    }
+    function sleepNow(farewell) {
+      stopListening(); onRef.current = false; setOn(false); quietRef.current = false; setQuiet(false); notesRef.current = false;
+      if (farewell) botSay(farewell, true); else stopSpeaking();
+    }
+    function startAI() {
+      onRef.current = true; setOn(true); quietRef.current = false; setQuiet(false); setNote(""); setPanel(null);
+      startListening();
+      if (R.current.speakOn) speak(START_SAY);
+    }
+    function doOff(text) { stopSpeaking(); if (!quietRef.current) addMsg("user", text, { local: true }); sleepNow(ACK.off[scriptLang(text)]); }
+    function togglePower() { if (onRef.current) sleepNow(""); else startAI(); }
+    function saveMem(text, kind) { setMemory(function (p) { return p.concat({ id: Date.now() + Math.random(), text: text.trim().slice(0, 240), kind: kind }).slice(-60); }); }
+
+    function send(raw) {
+      var text = String(raw || "").trim();
+      if (!text || !onRef.current) return;
+      var sl = scriptLang(text);
+      if (quietRef.current) { /* Quiet mode: keep listening, never answer, never show what was heard */
+        if (OFF_RE.test(text)) doOff(text);
+        else if (WAKE_RE.test(text) && !dup(text)) { quietRef.current = false; setQuiet(false); botSay(ACK.wake[sl], true); }
+        return;
+      }
+      if (busyRef.current || dup(text)) return;
+      setInput(""); setPartial(""); setNote("");
+      if (OFF_RE.test(text)) { doOff(text); return; }
+      if (QUIET_RE.test(text)) { stopSpeaking(); addMsg("user", text, { local: true }); quietRef.current = true; setQuiet(true); botSay(ACK.quiet[sl], true); return; }
+      var rm = text.match(REMEMBER_RE), nm = text.match(NOTE_RE);
+      if ((rm && rm[1].trim()) || (nm && nm[1].trim())) {
+        stopSpeaking(); addMsg("user", text, { local: true });
+        if (rm && rm[1].trim()) { saveMem(rm[1], "mem"); botSay(ACK.mem[sl], true); } else { saveMem(nm[1], "note"); botSay(ACK.note[sl], true); }
+        return;
+      }
+      if (notesRef.current) { stopSpeaking(); addMsg("user", text, { local: true }); notesRef.current = false; saveMem(text, "note"); botSay(ACK.note[sl], true); return; }
+
+      busyRef.current = true; setBusy(true); stopSpeaking(); clearBuf();
+      idRef.current += 1;
+      var history = msgsRef.current.concat({ id: idRef.current, role: "user", text: text });
+      setMsgs(history);
+      var turns = history.filter(function (x) { return !x.greeting && !x.error && !x.local; }).slice(-12).map(function (x) { return { role: x.role, content: x.text }; });
+      while (turns.length && turns[0].role !== "user") turns.shift();
+      var cfg = R.current, system = buildSystem({ character: cfg.character, skill: cfg.skill, summary: cfg.summary, memory: cfg.memory });
+      ask(turns, system).then(function (r) {
+        if (!onRef.current) return;
+        addMsg("assistant", r.text, { via: r.via });
+        if (R.current.speakOn) speak(r.text);
+        turnsRef.current += 1;
+        if (turnsRef.current % 10 === 0) setTimeout(function () { summarize(true); }, 1500);
+      }).catch(function (e) { addMsg("assistant", errText(e), { error: true }); }).then(function () {
+        busyRef.current = false; setBusy(false); muteUntilRef.current = Math.max(muteUntilRef.current, Date.now() + 500);
+      });
+    }
+    api.current = { pushFinal: pushFinal, flush: flush, partial: partialText, dictIdle: dictIdle, startRec: startRec };
+
+    function toggleMic() { stopSpeaking(); setNote(""); if (wantRef.current) stopListening(); else startListening(); }
+    function onKey(e) { if (e.key === "Enter" && !e.nativeEvent.isComposing) { e.preventDefault(); send(input); } }
+    function pickSkill(id) {
+      if (!onRef.current) { setPanel(null); setNote("Tap Start AI first, then pick a skill."); return; }
+      setPanel(null); setNote("");
+      if (id === "notes") { notesRef.current = true; setSkill(null); R.current.skill = null; botSay("Go ahead, Abhi. What should I note?", true); return; }
+      notesRef.current = false; R.current.skill = id; setSkill(id);
+      send(SKILLS[id].kick);
+    }
+    function addMem() { var t = memDraft.trim(); if (!t) return; saveMem(t, "mem"); setMemDraft(""); }
+    function clearChat() { idRef.current += 1; setMsgs([{ id: idRef.current, role: "assistant", greeting: true, local: true, text: GREETING }]); }
+    function forgetAll() { if (!confirmForget) { setConfirmForget(true); return; } setMemory([]); setSummary(""); clearChat(); setConfirmForget(false); }
+    function testVoice() { stopSpeaking(); speak(startSample()); }
+    function startSample() { return "Hi Abhi, this is my voice. How does it sound?"; }
+    function openPanel(id) { setConfirmForget(false); setPanel(panel === id ? null : id); }
+
+    var av = AV[avatar], accent = "rgb(" + av.rgb.join(",") + ")";
+    var statusText = !on ? "Off. Tap Start AI" : quiet ? "Quiet Mode: listening, not replying" : speaking ? "Speaking…" : busy ? "Thinking…" : want ? "Listening…" : "Mic paused. You can type instead";
+    var engine, engineCls = "chip";
+    if (key && !blocked) { engine = "Gemini"; engineCls = "chip ok"; }
+    else if (hasClaude) { engine = "Claude (fallback)"; engineCls = "chip warn"; }
+    else { engine = "Key needed"; }
+    var voiceLabel = elKey && !elBad ? "ElevenLabs" : "Phone voice";
+    var cards = [
+      { id: "memory", pos: "tl", icon: "brain", label: "Memory", sub: memory.length ? memory.length + " memories" : "Empty", open: panel === "memory", onClick: function () { openPanel("memory"); } },
+      { id: "skills", pos: "tr", icon: "bolt", label: "Skills", sub: skill ? SKILLS[skill].label : "4 quick skills", open: panel === "skills", onClick: function () { openPanel("skills"); } },
+      { id: "character", pos: "bl", icon: "user", label: "Character", sub: CHARS[character].label, open: panel === "character", onClick: function () { openPanel("character"); } },
+      { id: "settings", pos: "br", icon: "gear", label: "Settings", sub: key ? "Key saved" : "Key needed", open: panel === "settings", onClick: function () { openPanel("settings"); } }
+    ];
+    var liveText = note ? h("div", { className: "live note", "aria-live": "polite" }, note) : h("div", { className: "live", "aria-live": "polite" }, want && !quiet && on ? (partial || "Speak…") : "");
+
+    function sheetBody() {
+      if (panel === "memory") return [
+        h("div", { key: "n", className: "field" }, h("h3", null, "Name"), h("div", { className: "box" }, "Abhijit (Abhi)")),
+        h("div", { key: "l", className: "field" }, h("h3", null, "What I remember"),
+          memory.length ? h("ul", { className: "list" }, memory.map(function (x) {
+            return h("li", { key: x.id }, h("span", { className: "kind" }, x.kind === "note" ? "Note" : "Memory"), h("span", { className: "t" }, x.text),
+              h("button", { className: "btn small danger", type: "button", onClick: function () { setMemory(function (p) { return p.filter(function (y) { return y.id !== x.id; }); }); } }, "Remove"));
+          })) : h("p", { className: "hint" }, "Nothing yet. Say \"Jarvis, remember that I like tea\" or add something below.")),
+        h("div", { key: "a", className: "row" },
+          h("input", { id: "mem-input", type: "text", value: memDraft, placeholder: "Add something to remember…", autoComplete: "off", "aria-label": "New memory", onChange: function (e) { setMemDraft(e.target.value); }, onKeyDown: function (e) { if (e.key === "Enter" && !e.nativeEvent.isComposing) { e.preventDefault(); addMem(); } } }),
+          h("button", { className: "btn", type: "button", disabled: !memDraft.trim(), onClick: addMem }, "Add")),
+        h("div", { key: "s", className: "field" }, h("h3", null, "Conversation summary"),
+          h("div", { className: "box" }, summary || "No summary yet. Chat for a bit, or tap the button below."),
+          h("div", { className: "row" },
+            h("button", { className: "btn", type: "button", disabled: sumBusy, onClick: function () { summarize(false); } }, sumBusy ? "Summarizing…" : "Update summary"),
+            h("span", { className: "chip" }, msgs.filter(function (x) { return !x.greeting; }).length + " messages saved"))),
+        h("div", { key: "d", className: "row" },
+          h("button", { className: "btn small", type: "button", onClick: clearChat }, "Clear chat"),
+          h("button", { className: "btn small danger", type: "button", onClick: forgetAll }, confirmForget ? "Sure? Forget everything" : "Forget everything"),
+          confirmForget ? h("button", { className: "btn small", type: "button", onClick: function () { setConfirmForget(false); } }, "No") : null),
+        h("p", { key: "p", className: "hint" }, "Everything here is saved in this browser's localStorage, so it's still here after you close and reopen the app.")
+      ];
+      if (panel === "skills") return [
+        h("div", { key: "g", className: "grid2" }, Object.keys(SKILLS).map(function (id) {
+          return h("button", { key: id, type: "button", className: "card", "aria-pressed": String(skill === id), onClick: function () { pickSkill(id); } }, h("b", null, SKILLS[id].label), h("span", null, SKILLS[id].sub));
+        })),
+        skill ? h("div", { key: "c", className: "row" }, h("span", { className: "chip ok" }, "Active: " + SKILLS[skill].label), h("button", { className: "btn small", type: "button", onClick: function () { setSkill(null); R.current.skill = null; } }, "Turn off skill")) : null,
+        h("p", { key: "h", className: "hint" }, "Pick a skill and Jarvis starts right away. Choose \"Save notes\" and speak, and it becomes a note in Memory. You can also say \"Note this: …\" directly.")
+      ];
+      if (panel === "character") return [
+        h("div", { key: "g", className: "grid2" }, Object.keys(CHARS).map(function (id) {
+          return h("button", { key: id, type: "button", className: "card", "aria-pressed": String(character === id), onClick: function () { setCharacter(id); R.current.character = id; } }, h("b", null, CHARS[id].label), h("span", null, CHARS[id].sub));
+        })),
+        h("p", { key: "h", className: "hint" }, "The personality changes from the next reply. To change the look and voice, choose CORE | FEMALE | MALE under the avatar.")
+      ];
+      if (panel === "settings") return [
+        h("div", { key: "k", className: "field" }, h("h3", null, "Gemini API Key"),
+          h("div", { className: "row" },
+            h("input", { id: "key-input", type: showKey ? "text" : "password", value: key, autoComplete: "off", spellCheck: false, placeholder: "AIza… paste here", "aria-label": "Gemini API key", onChange: function (e) { setKey(e.target.value.trim()); blockedRef.current = false; setBlocked(false); } }),
+            h("button", { className: "btn", type: "button", onClick: function () { setShowKey(!showKey); } }, showKey ? "Hide" : "Show"),
+            key ? h("button", { className: "btn danger", type: "button", onClick: function () { setKey(""); } }, "Remove") : null),
+          h("div", { className: "row" }, h("label", { htmlFor: "model-input", className: "hint" }, "Model"), h("input", { id: "model-input", type: "text", value: model, spellCheck: false, onChange: function (e) { setModel(e.target.value.trim()); blockedRef.current = false; setBlocked(false); } }))),
+        h("div", { key: "e", className: "field" }, h("h3", null, "ElevenLabs API Key"),
+          h("div", { className: "row" },
+            h("input", { id: "el-input", type: showKey ? "text" : "password", value: elKey, autoComplete: "off", spellCheck: false, placeholder: "Empty = your phone's best Google Natural voice", "aria-label": "ElevenLabs API key", onChange: function (e) { setElKey(e.target.value.trim()); elBlockedRef.current = false; setElBad(false); } }),
+            elKey ? h("button", { className: "btn danger", type: "button", onClick: function () { setElKey(""); } }, "Remove") : null),
+          h("input", { id: "vid-input", type: "text", value: voiceId, spellCheck: false, placeholder: "Voice ID (optional; empty = match the avatar)", "aria-label": "ElevenLabs voice ID", onChange: function (e) { setVoiceId(e.target.value.trim()); } }),
+          h("p", { className: "hint" }, "Model: eleven_multilingual_v2. Bengali isn't among its supported languages, as far as I know, so Bengali replies are always spoken in your phone's voice.")),
+        h("div", { key: "s", className: "field" }, h("h3", null, "Voice speed: " + speed.toFixed(2) + "x"),
+          h("input", { id: "speed-input", type: "range", min: "0.7", max: "1.3", step: "0.05", value: speed, "aria-label": "Voice speed", onChange: function (e) { setSpeed(parseFloat(e.target.value)); } }),
+          h("div", { className: "row" },
+            h("button", { className: "btn", type: "button", onClick: testVoice }, "Test voice"),
+            h("button", { className: "btn", type: "button", "aria-pressed": String(speakOn), onClick: function () { if (speakOn) stopSpeaking(); setSpeakOn(!speakOn); } }, speakOn ? "Spoken replies: On" : "Spoken replies: Off"))),
+        h("div", { key: "l", className: "field" }, h("h3", null, "Mic language"),
+          h("div", { className: "row" }, LANG_CYCLE.map(function (l) { return h("button", { key: l, type: "button", className: "btn small" + (lang === l ? " sel" : ""), "aria-pressed": String(lang === l), onClick: function () { setLang(l); } }, LANG_NAMES[l]); })),
+          h("p", { className: "hint" }, "Reply language and voice follow the language of your message automatically.")),
+        h("div", { key: "c", className: "field" }, h("h3", null, "Voice commands"),
+          h("p", { className: "hint" }, "Quiet Mode: say \"Be quiet\" (or in Hindi: \"Jarvis शांत रहो\" / \"दोस्तों से बात कर रहा हूँ\"); it keeps listening but stays silent. Resume: \"Wake up Jarvis\" (or \"Jarvis दोस्त चले गए\" / \"अब बोलो\"). Terminate: \"Stop Jarvis\" (or \"Jarvis खुद का स्विच ऑफ कर दो\"). Memory: \"Remember that …\" (or \"याद रखो …\"). Notes: \"Note this: …\" (or \"नोट करो …\").")),
+        h("p", { key: "p", className: "hint" }, "All settings, API keys and chat history stay in this browser's localStorage. On a shared computer, use Remove to clear your keys.")
+      ];
+      return null;
+    }
+    var titles = { memory: "Memory", skills: "Skills", character: "Character", settings: "Settings" };
+
+    return h("div", { className: "app", style: { "--accent": accent } },
+      h("div", { className: "head" },
+        h("h1", null, "JARVIS"),
+        h("div", { className: "engine" }, h("span", { className: engineCls }, engine), h("span", { className: "chip" }, voiceLabel))),
+      h(Stage, { live: live, cards: cards, label: "Jarvis 3D particle avatar: " + av.label }),
+      h("div", { className: "seg", role: "radiogroup", "aria-label": "Avatar and voice style" }, AV_KEYS.map(function (k) {
+        return h("button", { key: k, type: "button", role: "radio", "aria-checked": String(avatar === k), onClick: function () { setAvatar(k); R.current.avatar = k; } }, AV[k].label);
+      })),
+      h("button", { className: "power" + (on ? " running" : ""), type: "button", "aria-pressed": String(on), onClick: togglePower },
+        h(Icon, { name: "power", size: 24 }), on ? "Terminate" : "Start AI"),
+      h("div", { className: "statusrow" },
+        h("div", { className: "status", "aria-live": "polite" }, statusText),
+        skill ? h("span", { className: "skillchip" }, h("span", { className: "chip ok" }, "Skill: " + SKILLS[skill].label), h("button", { className: "chip", type: "button", onClick: function () { setSkill(null); R.current.skill = null; }, "aria-label": "Turn off skill" }, "× Off")) : null,
+        liveText),
+      blocked ? h("p", { className: "banner", role: "status" }, "Gemini can't be reached from inside this page, so replies are coming from Claude for now. To talk to Gemini directly, run this page on your own site.") : null,
+      h("div", { className: "chat", ref: chatRef, role: "log", "aria-live": "polite" },
+        msgs.map(function (x) { return h("div", { key: x.id, className: "msg " + x.role + (x.error ? " error" : "") }, x.text, x.via ? h("span", { className: "via" }, "via " + x.via) : null); }),
+        busy ? h("div", { className: "dots", "aria-label": "Reply incoming" }, h("i"), h("i"), h("i")) : null),
+      h("div", { className: "composer" },
+        h("div", { className: "compose-row" },
+          h("button", { className: "round mic" + (want ? (quiet ? " quiet" : " on") : ""), type: "button", disabled: !on || micMode === "none", onClick: toggleMic, "aria-pressed": String(want), "aria-label": want ? "Pause mic" : "Turn mic on", title: micMode === "none" ? "Microphone isn't available in this browser" : (want ? "Pause mic" : "Turn mic on") }, h(Icon, { name: want ? "stop" : "mic", size: 24 })),
+          h("input", { id: "chat-input", type: "text", value: input, disabled: !on, placeholder: on ? "Type or speak…" : "Tap Start AI first", autoComplete: "off", "aria-label": "Message", onChange: function (e) { setInput(e.target.value); }, onKeyDown: onKey }),
+          h("button", { className: "round send", type: "button", disabled: !on || busy || !input.trim(), onClick: function () { send(input); }, "aria-label": "Send" }, h(Icon, { name: "send", size: 22 })))),
+      panel ? h("div", { className: "backdrop", onClick: function () { setPanel(null); } }) : null,
+      panel ? h("div", { className: "sheet", role: "dialog", "aria-modal": "true", "aria-label": titles[panel] },
+        h("div", { className: "sheet-in" },
+          h("div", { className: "sheethead" }, h("h2", null, titles[panel]), h("button", { className: "btn small", type: "button", "aria-label": "Close", onClick: function () { setPanel(null); } }, h(Icon, { name: "close", size: 18 }), "Close")),
+          sheetBody())) : null
+    );
+  }
+
+  ReactDOM.createRoot(document.getElementById("root")).render(h(App));
+})();
+</script>
+
+</body></html>
